@@ -1,9 +1,10 @@
 import React from 'react'
-import {FlatList, View, Text, StyleSheet} from 'react-native'
-import {Product} from './Product'
+import {View, StyleSheet} from 'react-native'
+import {IProductBase, Product} from './Product'
 
 export interface IProductList {
-  items: any
+  items: IProductBase[],
+  openModalCallback: (product: IProductBase) => void
 }
 
 export class ProductList extends React.Component<IProductList, {}> {
@@ -14,9 +15,9 @@ export class ProductList extends React.Component<IProductList, {}> {
   render() {
     return (
       <View style={this.styles.container}>
-        {this.props.items.map((item: any, key: any) => (
+        {this.props.items.map((item: IProductBase, key: any) => (
           <View style={{width: '49%'}} key={item.id}>
-            <Product {...item} />
+            <Product product={item} openModalCallback={this.props.openModalCallback} />
           </View>
         ))}
       </View>

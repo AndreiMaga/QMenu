@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {IProduct} from '../restaurantview/product'
+import {IProduct, IProductBase} from '../restaurantview/product'
 
 interface IFavorites {
-  products: IProduct[]
+  products: number[]
 }
 
 interface ICachedItem extends Partial<IFavorites> {}
@@ -20,7 +20,7 @@ export class Cache {
   }
 
   public async getCachedItems<T>(key: string) {
-    if (this.cache === {}) {
+    if (Object.keys(this.cache).length === 0) {
       await this.loadCachedValues()
     }
 
@@ -33,9 +33,8 @@ export class Cache {
 
   async loadCachedValues() {
     let favorites = await AsyncStorage.getItem('favorites')
-    if (favorites !== null) {
-      this.registerCachedValue('favorites', favorites)
-    }
+    this.registerCachedValue('favorites', favorites === null ? "{\"products\":[]}" : favorites)
+
   }
 
   private registerCachedValue(key: string, value: string) {
@@ -49,14 +48,14 @@ export class Cache {
       JSON.stringify(this.cache['favorites'])
     )
   }
-  public async addFav(product: IProduct) {
-    (await this.getFavProducts()).push(product)
+  public async addFav(product: IProductBase) {
+    (await this.getFavProducts()).push(product.id)
     await this.saveFav()
   }
 
-  public async removeFav(product: IProduct){
+  public async removeFav(product: IProductBase){
     let array = await this.getFavProducts()
-    let index = array.indexOf(product)
+    let index = array.indexOf(product.id)
     if(index > -1)
     {
       array.splice(index, 1)
@@ -65,6 +64,13 @@ export class Cache {
 
   public async getFavProducts(){
     return (await this.getCachedItems<IFavorites>('favorites')).products
+  }
+
+  public async isFav(product: IProductBase){
+    if((await this.getFavProducts()).indexOf(product.id) !== -1){
+      return true
+    }
+    return false
   }
   //#endregion
 

@@ -7,9 +7,10 @@ import database from '@react-native-firebase/database'
 import {StyleSheet} from 'react-native'
 import {StackNavigationProp} from '@react-navigation/stack'
 import {RootStackParamList} from '../../App'
-import {IProduct} from '../restaurantview/product'
+import {IProductBase} from '../restaurantview/product'
 import {RouteProp} from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Cache } from '../cache/Cache'
 
 export interface ICameraProps {
   codescanner?:
@@ -55,6 +56,8 @@ export default class Camera extends React.Component<CameraProps, {}> {
 
     // cache it
     let storage = await AsyncStorage.getItem(restaurant)
+    await Cache.getInstance().loadCachedValues()
+
 
     if (storage !== null) {
       let storagedata = JSON.parse(storage)
@@ -75,7 +78,7 @@ export default class Camera extends React.Component<CameraProps, {}> {
 
     let ref = database().ref(restaurant)
 
-    let data: IProduct[] = []
+    let data: IProductBase[] = []
 
     ref.on(
       'value',
@@ -95,29 +98,32 @@ export default class Camera extends React.Component<CameraProps, {}> {
     )
   }
 
-  getDataFromSnapshot(json: any): IProduct[] {
-    let result: IProduct[] = []
+  getDataFromSnapshot(json: any): IProductBase[] {
+    let result: IProductBase[] = []
 
     if (json === null) {
       return result
     }
 
     Object.keys(json).forEach((key) => {
-      let value: IProduct = this.convertObjectToIProduct(json[key])
+      if(key == 'time'){
+        return
+      }
+      let value: IProductBase = this.convertObjectToIProduct(json[key])
       result.push(value)
     })
 
     return result
   }
 
-  convertObjectToIProduct(obj: any): IProduct {
+  convertObjectToIProduct(obj: any): IProductBase {
     return {
       name: obj.name,
       description: obj.description,
       price: obj.price,
       ingredients: obj.ingredients,
       photoid: obj.photoid,
-      id: obj.id ? obj.id : 0
+      id: obj.id
     }
   }
 

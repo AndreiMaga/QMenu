@@ -13,7 +13,9 @@ export class IconListItem extends React.Component<IIconListItemProps, {}> {
   render() {
     return (
       <TouchableOpacity style={this.styles.container}>
-        <View style={this.styles.innerContainer}>{{...this.props.item}}</View>
+        <View style={this.styles.innerContainer}>
+          <Image source={this.props.item.image} style={this.styles.image} />
+        </View>
       </TouchableOpacity>
     )
   }
